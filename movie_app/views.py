@@ -91,7 +91,14 @@ def main_page(request):
 
 def parse_movies(request):
     url = 'https://ticketon.kz/cinema'
-    soup = BeautifulSoup(requests.get(url).content, 'html.parser')
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'html.parser')
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching data from {url}: {e}")
+        return render(request, 'movie_app/error.html', {'error': 'Ошибка при получении данных с сайта'})
+
     movies = []
 
     for movie in soup.find_all('a', class_='list-item__link'):
@@ -102,21 +109,18 @@ def parse_movies(request):
             movies.append({'title': title, 'url': link})
 
     for movie_data in movies:
-        response = requests.get(movie_data['url'])
-        movie_soup = BeautifulSoup(response.content, 'html.parser')
+        try:
+            movie_response = requests.get(movie_data['url'])
+            movie_response.raise_for_status()
+            movie_soup = BeautifulSoup(movie_response.content, 'html.parser')
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching movie details for {movie_data['title']}: {e}")
+            continue
 
-        # Инициализация переменных для данных о фильме
         year = 'Не указан'
-        distributor = '[Дистрибьютор не указан]'
-        country = 'Не указана'
         director_name = 'Не указан'
         cast_names = []
-        genre = 'Не указан'
-        duration = 'Не указана'
-        age_rating = 'Не указано'
-        premiere_date = 'Не указана'
 
-        # Извлечение данных
         for p in movie_soup.find_all('p'):
             strong_tag = p.find('strong')
             if strong_tag:
@@ -125,43 +129,57 @@ def parse_movies(request):
 
                 if 'год выпуска' in label:
                     year = value
-                elif 'дистрибьютор' in label:
-                    distributor = value
-                elif 'страна производства' in label:
-                    country = value
                 elif 'режиссер' in label:
                     director_name = value
                 elif 'главные роли' in label:
                     cast_names = value.split(', ')
-                elif 'жанр' in label:
-                    genre = value
-                elif 'продолжительность' in label:
-                    duration = value
-                elif 'возрастное ограничение' in label:
-                    age_rating = value
 
+        # Check for existing movie
+        slug_title = slugify(title)
+        existing_movie = Movie.objects.filter(slug=slug_title, year=int(year) if year.isdigit() else None).first()
+        if existing_movie:
+            print(f"Skipping duplicate movie entry: {title} ({year})")
+            continue
 
-        # Сохранение режиссера
-        director, _ = Director.objects.get_or_create(first_name=director_name.split()[0],
-                                                     last_name=director_name.split()[1])
+        # Process director
+        director_name_parts = director_name.split()
+        if len(director_name_parts) >= 2:
+            director, _ = Director.objects.get_or_create(
+                first_name=director_name_parts[0],
+                last_name=director_name_parts[1]
+            )
+        elif director_name_parts:
+            director, _ = Director.objects.get_or_create(
+                first_name=director_name_parts[0],
+                last_name=""
+            )
+        else:
+            print(f"Skipping director creation for movie {title} due to missing data.")
+            continue
 
-        # Сохранение актеров
+        # Process actors
         actors = []
         for actor_name in cast_names:
-            actor_first_name, actor_last_name = actor_name.split(' ', 1)
-            actor, _ = Actor.objects.get_or_create(first_name=actor_first_name, last_name=actor_last_name)
+            actor_name_parts = actor_name.split(' ', 1)
+            actor_first_name = actor_name_parts[0]
+            actor_last_name = actor_name_parts[1] if len(actor_name_parts) > 1 else ""
+
+            actor, _ = Actor.objects.get_or_create(
+                first_name=actor_first_name,
+                last_name=actor_last_name
+            )
             actors.append(actor)
 
+        # Save movie
         movie = Movie(
             name=title,
             year=int(year) if year.isdigit() else None,
             director=director,
             budget=1000000,
             rating=7,
-            slug=slugify(title)
+            slug=slug_title
         )
         movie.save()
         movie.actor.set(actors)
-        movie.save()
 
     return render(request, 'movie_app/success.html', {'movies': movies})

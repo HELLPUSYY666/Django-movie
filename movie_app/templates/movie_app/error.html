@@ -1,0 +1,17 @@
+
+{% block content %}
+<h1>Произошла ошибка!</h1>
+<p>Фильмы не были добавлены в базу данных:</p>
+
+<ul>
+    {% for movie in movies %}
+        <li>
+            <a href="{{ movie.get_url }}">{{ movie.name }}</a> - Рейтинг: {{ movie.rating }}% - Год: {{ movie.year }} - Бюджет: {{ movie.budget }}$
+        </li>
+    {% empty %}
+        <li>Нет фильмов для отображения.</li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'movie-list' %}">Посмотреть все фильмы</a>
+{% endblock %}
