@@ -79,3 +79,6 @@ def get_rate_movie(request):
 
 def done_review(request):
     return render(request, 'movie_app/done_review.html')
+
+def main_page(request):
+    return render(request, 'movie_app/all_movie.html')
