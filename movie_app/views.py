@@ -82,4 +82,4 @@ def done_review(request):
 
 
 def main_page(request):
-    return render(request, 'movie_app/all_movie.html')
+    return render(request, 'movie_app/home_page.html')

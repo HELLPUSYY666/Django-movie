@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Парсер сайтов</title>
+    <title>Поиск фильмов</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -46,9 +46,18 @@
         }
     </style>
 </head>
+<nav class="navbar">
+    <ul>
+        <li><a href="{% url 'main' %}" title="Go to Home">Главная</a></li>
+        <li><a href="{% url 'movie-list' %}" title="View Film List">Фильмы</a></li>
+        <li><a href="{% url 'actor' %}" title="Actors">Актеры</a></li>
+        <li><a href="{% url 'show-directors' %}" title="Directors">Режиссеры</a></li>
+        <li><a href="https://github.com/HELLPUSYY666" title="Contact Us">Контакты</a></li>
+    </ul>
+</nav>
 <body>
 
-<h1>Парсер сайтов</h1>
+<h1>Поиск фильмов</h1>
 
 <form id="parserForm">
     <label for="url">Введите URL сайта:</label>
