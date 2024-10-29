@@ -1,0 +1,15 @@
+{% block content %}
+    <h5>Список всех фильмов</h5>
+    <ul class="movie-list">
+        {% for movie in movies %}
+            <li>
+                <a href="{{ movie.get_url }}">{{ movie.name }}</a>,
+                рейтинг - {{ movie.rating }},
+                год - {{ movie.year }},
+                бюджет - {{ movie.budget }}
+            </li>
+        {% empty %}
+            <li>Нет фильмов для отображения.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

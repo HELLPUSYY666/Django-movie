@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ movie.name }}</title>
+    <link rel="stylesheet" href="{% static 'movie_app/index.css' %}">
+</head>
+{% block content %}
+    <h2>Информация о фильме - {{ movie.name }}</h2>
+    <h3>Название: {{ movie.name }}</h3>
+    <h3>Бюджет: {{ movie.budget }}</h3>
+    <h3>Год: {{ movie.year }}</h3>
+    <h3>Рейтинг:{{ movie.rating }}</h3>
+    <hr>
+    <h2>Информация о режиссере</h2>
+    <h3>Имя: {{ movie.director.first_name }}</h3>
+    <h3>Фамилия: {{ movie.director.last_name }}</h3>
+    <hr>
+    <h3>Список актеров</h3>
+    <ul>
+        {% for actor in movie.actor.all %}
+            <li><a>{{ actor }}</a></li>
+        {% endfor %}
+    </ul>
+    <br>
+    <br>
+    <h2>Оставить отзыв на фильм</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-style {% if field.errors %} errors {% endif %}">
+                {{ field.label_tag }}
+                {{ field }}
+                {{ field.errors }}
+            </div>
+        {% endfor %}
+
+        <button type="submit">Отправить</button>
+    </form>
+
+{% endblock %}

@@ -1,0 +1,14 @@
+{% block content %}
+    <h5>Список всех режиссеров</h5>
+    <ul class="director-list">
+        {% for director in directors %}
+            <li>
+                <a href="{% url 'director-detail' director.id %}">{{ director.first_name }} {{ director.last_name }}</a>,
+                Имя - {{ director.first_name }},
+                Фамилия - {{ director.last_name }},
+            </li>
+        {% empty %}
+            <li>Нет режиссеров для отображения.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
