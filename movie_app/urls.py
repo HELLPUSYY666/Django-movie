@@ -5,6 +5,7 @@ from views import MovieListView, DirectorListView, ActorListView, ActorDetailVie
 urlpatterns = [
     path('', views.main_page, name='main'),
     path('all', MovieListView.as_view(), name='movie-list'),
+    path('parse_movies/', views.parse_movies, name='parse_movies'),
     path('done_review/', views.done_review, name='done_review'),
     path('director/', views.DirectorListView.as_view(), name='director'),
     path('director/<int:pk>/', views.DirectorDetailView.as_view(), name='director-detail'),
