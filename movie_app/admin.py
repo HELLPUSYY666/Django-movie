@@ -49,7 +49,9 @@ class MovieAdmin(admin.ModelAdmin):
 
     @admin.display(ordering='-rating', description='Личное мнение')
     def rating_status(self, movie):
-        if movie.rating < 2:
+        if movie.rating is None:
+            return 'Рейтинг не указан'
+        elif movie.rating < 2:
             return 'Говно не смотрите'
         elif movie.rating < 5:
             return 'Прикольно на разок'

@@ -44,22 +44,30 @@ class Movie(models.Model):
     director = models.ForeignKey(Director, on_delete=models.CASCADE, null=True)
     actor = models.ManyToManyField(Actor)
     name = models.CharField(max_length=40)
-    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], null=True, blank=True)
     year = models.IntegerField(null=True, validators=[MinValueValidator(1900), MaxValueValidator(2050)])
     budget = models.IntegerField(default=1000000, validators=[MinValueValidator(1), MaxValueValidator(10000000)])
     slug = models.SlugField(default='', null=False)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+        if not self.slug:
+            base_slug = slugify(self.name) if self.name else ''
+            slug = base_slug
+            counter = 1
+            while Movie.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super(Movie, self).save(*args, **kwargs)
 
-    def get_url(self):
-        return reverse('movie-detail', args=[self.slug])
 
-    def __str__(self):
-        return f'{self.name} - {self.rating}% - {self.year} - {self.budget}$'
+def get_url(self):
+    return reverse('movie-detail', args=[self.slug])
+
+
+def __str__(self):
+    return f'{self.name} - {self.rating}% - {self.year} - {self.budget}$'
 
 
 class Feedback(models.Model):
     review = models.TextField(max_length=1000, validators=[MinLengthValidator(10), MaxLengthValidator(1000)])
-
