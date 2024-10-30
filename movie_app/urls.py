@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 from views import MovieListView
 
@@ -12,4 +12,5 @@ urlpatterns = [
     path('actor/', views.ActorListView.as_view(), name='actor'),
     path('actor/<int:pk>/', views.ActorDetailView.as_view(), name='actor-detail'),
     path('movie/<int:pk>/', views.show_one_movie, name='movie-detail'),
+    path('__debug__/', include('debug_toolbar.urls')),
 ]

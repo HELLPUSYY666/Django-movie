@@ -5,6 +5,8 @@ from django.views.generic import ListView, DetailView
 from bs4 import BeautifulSoup
 import requests
 from django.utils.text import slugify
+import redis
+from django.core.cache import cache
 
 
 def show_one_movie(request, pk: int):
@@ -30,11 +32,37 @@ class MovieListView(ListView):
     template_name = 'movie_app/all_movie.html'
     context_object_name = 'movies'
 
+    def get_queryset(self):
+        movies = cache.get('all_movies')
+        if movies:
+            print('Hit the cache')
+        else:
+            movies = Movie.objects.all()
+            if movies.exists():
+                cache.set('all_movies', movies, timeout=60 * 15)
+                print('Hit the db')
+            else:
+                return HttpResponse('No movies found')
+        return movies
+
 
 class DirectorListView(ListView):
     model = Director
     template_name = 'movie_app/all_director.html'
     context_object_name = 'directors'
+
+    def get_queryset(self):
+        directors = cache.get('all_directors')
+        if directors:
+            print('Hit the cache')
+        else:
+            directors = Director.objects.all()
+            if directors.exists():
+                cache.set('all_directors', directors, timeout=60 * 15)
+                print('Hit the db')
+            else:
+                return HttpResponse('No directors found')
+        return directors
 
 
 class DirectorDetailView(DetailView):
@@ -46,6 +74,19 @@ class ActorListView(ListView):
     model = Actor
     template_name = 'movie_app/all_actor.html'
     context_object_name = 'actors'
+
+    def get_queryset(self):
+        actors = cache.get('all_actors')
+        if actors:
+            print('Hit the cache')
+        else:
+            actors = Actor.objects.all()
+            if actors.exists():
+                cache.set('all_actors', actors, timeout=60 * 15)
+                print('Hit the db')
+            else:
+                return HttpResponse('No actors found')
+        return actors
 
 
 class ActorDetailView(DetailView):
@@ -138,3 +179,7 @@ def parse_movies(request):
 
     return render(request, 'movie_app/home_page.html')
 
+
+redis_client = redis.Redis(host='localhost', port=6379, db=0)
+
+redis_client.close()

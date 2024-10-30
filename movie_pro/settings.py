@@ -40,8 +40,6 @@ INSTALLED_APPS = [
     'movie_app',
     'django_extensions',
     'debug_toolbar',
-
-
 ]
 
 MIDDLEWARE = [
@@ -135,3 +133,10 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+    }
+}
