@@ -10,9 +10,11 @@
             margin: 20px;
             background-color: #f4f4f4;
         }
+
         h1 {
             color: #333;
         }
+
         form {
             margin-bottom: 20px;
             padding: 20px;
@@ -20,6 +22,7 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         input[type="text"] {
             width: calc(100% - 20px);
             padding: 10px;
@@ -27,6 +30,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+
         input[type="submit"] {
             padding: 10px 15px;
             background-color: #5cb85c;
@@ -35,9 +39,11 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
         input[type="submit"]:hover {
             background-color: #4cae4c;
         }
+
         .results {
             padding: 20px;
             background: #fff;
@@ -59,11 +65,13 @@
 
 <h1>Поиск фильмов</h1>
 
-<form id="parserForm">
-    <label for="url">Введите URL сайта:</label>
-    <input type="text" id="url" name="url" placeholder="https://example.com" required>
+<form id="parserForm" action="{% url 'parse_movies' %}" method="post">
+    {% csrf_token %}
+    <input type="text" id="url" name="url" placeholder="Введите URL для парсинга" required>
     <input type="submit" value="Парсить">
 </form>
+
+
 
 <div class="results" id="results" style="display: none;">
     <h2>Результаты парсинга:</h2>
@@ -71,18 +79,28 @@
 </div>
 
 <script>
-    document.getElementById('parserForm').addEventListener('submit', function(event) {
-        event.preventDefault();
+document.getElementById('parserForm').addEventListener('submit', function (event) {
+    event.preventDefault();
 
-        const url = document.getElementById('url').value;
+    const url = document.getElementById('url').value;
 
-        // Здесь будет ваш код для отправки запроса на сервер и получения результатов парсинга
-        // Для демонстрации просто выводим введенный URL
-        const output = `Парсинг сайта: ${url}\n\nРезультаты:\n\n[Здесь будут результаты парсинга]`;
-
+    fetch("{% url 'parse_movies' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ url: url })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const output = `Парсинг сайта: ${url}\n\nРезультаты:\n\n${data.results}`;
         document.getElementById('output').textContent = output;
         document.getElementById('results').style.display = 'block';
-    });
+    })
+    .catch(error => console.error('Ошибка:', error));
+});
+
 </script>
 
 </body>
