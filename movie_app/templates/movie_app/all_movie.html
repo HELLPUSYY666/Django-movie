@@ -3,7 +3,7 @@
     <ul class="movie-list">
         {% for movie in movies %}
             <li>
-                <a href="{{ movie.get_url }}">{{ movie.name }}</a>,
+                <a href="{% url 'movie-detail' movie.pk %}">{{ movie.name }}</a>,
                 рейтинг - {{ movie.rating }},
                 год - {{ movie.year }},
                 бюджет - {{ movie.budget }}

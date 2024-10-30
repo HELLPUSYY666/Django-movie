@@ -7,15 +7,15 @@ import requests
 from django.utils.text import slugify
 
 
-def show_one_movie(request, slug_movie: str):
-    movie = get_object_or_404(Movie, slug=slug_movie)
+def show_one_movie(request, pk: int):
+    movie = get_object_or_404(Movie, pk=pk)
     form = MovieForm()
 
     if request.method == 'POST':
         form = MovieForm(request.POST)
         if form.is_valid():
             print(form.cleaned_data)
-            feed = Feedback(review=form.cleaned_data['review'], movie=movie)  # Associate feedback with the movie
+            feed = Feedback(review=form.cleaned_data['review'], movie=movie)
             feed.save()
             return HttpResponseRedirect('/done_review')
 
@@ -75,7 +75,6 @@ def parse_movies(request):
 
     movies = []
 
-    # Сбор данных о фильмах
     for movie in soup.find_all('a', class_='list-item__link'):
         link = 'https://ticketon.kz' + movie.get('href')
         title_tag = movie.find('span', class_='list-item__event')
@@ -84,7 +83,6 @@ def parse_movies(request):
             movies.append({'title': title, 'url': link})
             print(f"Найден фильм: {title}")
 
-    # Сбор деталей для каждого фильма
     for movie_data in movies:
         try:
             print(f"Получаем детали для фильма: {movie_data['title']}")
@@ -95,11 +93,10 @@ def parse_movies(request):
             print(f"Ошибка при получении деталей фильма {movie_data['title']}: {e}")
             continue
 
-        year = None  # Установим year по умолчанию в None
+        year = None
         director_name = 'Не указан'
         cast_names = []
 
-        # Извлечение информации о фильме
         for p in movie_soup.find_all('p'):
             strong_tag = p.find('strong')
             if strong_tag:
@@ -108,27 +105,24 @@ def parse_movies(request):
 
                 if 'год выпуска' in label:
                     if value != 'Не указан':
-                        year = int(value)  # Преобразуем в число, если указано
+                        year = int(value)
                 elif 'режиссер' in label:
                     director_name = value
                 elif 'главные актёры:' in label:
                     cast_names = value.split(', ')
 
-        # Создание/получение режиссера
         first_name, last_name = director_name.split(' ', 1) if ' ' in director_name else (director_name, '')
         director, created = Director.objects.get_or_create(first_name=first_name, last_name=last_name)
 
-        # Создание нового фильма
         slug_title = slugify(movie_data['title'])
         movie = Movie(
             name=movie_data['title'],
-            year=year,  # Устанавливаем год (или None)
+            year=year,
             director=director,
             slug=slug_title
         )
         movie.save()
 
-        # Добавление актеров
         for actor_name in cast_names:
             first_name, last_name = actor_name.split(' ', 1) if ' ' in actor_name else (actor_name, '')
             actor, _ = Actor.objects.get_or_create(first_name=first_name, last_name=last_name)
