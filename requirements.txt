@@ -1,0 +1,12 @@
+django
+django-extensions
+django-debug-toolbar
+djangorestframework
+djangorestframework-simplejwt
+dj-rest-auth
+djoser
+pillow
+redis
+django-redis
+beautifulsoup4
+requests
